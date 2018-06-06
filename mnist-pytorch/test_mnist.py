@@ -13,11 +13,11 @@ from loader import test_loader
 
 def set_args():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--test-batch-size', type=int,   default=1000)
-    parser.add_argument('--seed',            type=int,   default=1)
+    parser.add_argument('--test-batch-size', type=int,   default=32)
+    parser.add_argument('--seed',            type=int,   default=3)
     parser.add_argument('--device_id',       type=int,   default=0)
     # model directory and name
-    parser.add_argument('--model-dir',       type=str,   default="./models")
+    parser.add_argument('--model-dir',       type=str,   default="../models/MNIST")
     parser.add_argument('--model-name',      type=str,   default="mnist-10.pth")
 
     args = parser.parse_args()
@@ -33,16 +33,16 @@ def test(data_loader, model, args):
     test_loss, correct = 0.0, 0
     for data, target in data_loader:
         if args.cuda:
-            data, target = data.cuda(), target.cuda()
-        data, target = Variable(data, volatile=True), Variable(target)
+            data, target = data.cuda(args.device_id), target.cuda(args.device_id)
+        data, target = Variable(data), Variable(target)
         output = model(data)
-        test_loss += F.nll_loss(output, target, size_average=False).data[0]
+        test_loss += F.nll_loss(output, target, size_average=False)
         pred = output.data.max(1)[1]
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     test_loss /= len(data_loader.dataset)
-    print("\n Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)\n".format(
-        test_loss, correct, len(data_loader.dataset), 100. * correct / len(data_loader.dataset)
+    print("\n Test set: Average loss: {:.4f}, Accuracy: {}/{} ({}%)\n".format(
+        test_loss, correct, len(data_loader.dataset), 100.0 * float(correct) / len(data_loader.dataset)
     ))
 
 
@@ -60,5 +60,5 @@ if __name__ == '__main__':
     # dataloader
     data_loader = test_loader(args)
 
-    # start training
+    # start testing
     test(data_loader, model, args)

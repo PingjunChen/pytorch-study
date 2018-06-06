@@ -1,0 +1,15 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "10.244.13.147",
+  "target": "/data/.data3/pingjun/pytorch-study",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**"
+  ],
+  "username": "pingjun",
+  "password": "!G0430@med",
+  "watch": [],
+  "transport": "scp"
+}

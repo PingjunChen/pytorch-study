@@ -3,7 +3,6 @@
 import torch.utils.data
 from torchvision import datasets, transforms
 
-
 def train_loader(args):
     kwargs = {"num_workers": 1, "pin_memory": True} if args.cuda else {}
     loader = torch.utils.data.DataLoader(

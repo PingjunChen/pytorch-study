@@ -21,10 +21,10 @@ def set_args():
     parser.add_argument('--momentum',        type=float, default=0.9)
     #
     parser.add_argument('--seed',            type=int,   default=1)
-    parser.add_argument('--device_id',       type=int,   default=0)
+    parser.add_argument('--device_id',       type=int,   default=3)
     parser.add_argument('--log-interval',    type=int,   default=10)
     # model directory and name
-    parser.add_argument('--model-dir',       type=str,   default="./models")
+    parser.add_argument('--model-dir',       type=str,   default="../models/MNIST")
     parser.add_argument('--model-name',      type=str,   default="mnist")
 
     args = parser.parse_args()
@@ -42,7 +42,7 @@ def train(data_loader, model, args):
     for epoch in range(1, args.epochs+1):
         for batch_idx, (data, target) in enumerate(data_loader):
             if args.cuda:
-                data, target = data.cuda(), target.cuda()
+                data, target = data.cuda(args.device_id), target.cuda(args.device_id)
             data, target = Variable(data), Variable(target)
             optimizer.zero_grad()
             output = model(data)
@@ -50,9 +50,10 @@ def train(data_loader, model, args):
             loss.backward()
             optimizer.step()
             if batch_idx > 0 and batch_idx % args.log_interval == 0:
-                print("Train Epoch: {} [{}/{} ({:.0f})%)]\t Loss: {:.6f}".format(
+                batch_progress = 100. * batch_idx / len(data_loader)
+                print("Train Epoch: {} [{}/{} ({:.1f})%)]\t Loss: {:.6f}".format(
                     epoch, batch_idx * len(data), len(data_loader.dataset),
-                    100. * batch_idx / len(data_loader), loss.data[0]
+                    batch_progress, loss.data[0]
                 ))
         cur_model_name = args.model_name + "-" + str(epoch).zfill(2) + ".pth"
         torch.save(model.state_dict(), os.path.join(args.model_dir, cur_model_name))
@@ -62,9 +63,9 @@ def train(data_loader, model, args):
 if __name__ == '__main__':
     args = set_args()
     # Config model and gpu
-    args.cuda = torch.cuda.is_available()
     torch.manual_seed(args.seed)
     model = Net()
+    args.cuda = torch.cuda.is_available()
     if args.cuda:
         torch.cuda.manual_seed(args.seed)
         model.cuda(args.device_id)
