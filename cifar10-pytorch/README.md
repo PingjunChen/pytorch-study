@@ -1,6 +1,6 @@
 cifar10-pytorch
 ========
-* Train and test *convnets* on *cifar10* datasets using pytorch.  
+* Train and test *convnets* on *cifar10* dataset using pytorch.  
 * Adapted from [kuangliu/pytorch-cifar](https://github.com/kuangliu/pytorch-cifar).
 
 
@@ -19,7 +19,7 @@ cifar10-pytorch
 ## Training detail
 * SGD optimizer with momentum (0.9) and weight decay (5.0e-4)
 * Initial learning rate (0.1) and batch size (64)
-* Training 300 epochs, learning rate decay 0.1X per 100 epochs
+* Training 300 epochs, learning rate decay exponentially by 0.1X per 100 epochs
 
 ## Todo
-* AlexNet using common training set get low accuracy, need to adjust.
+* AlexNet using default training settings gets low classification accuracy. Adjustment is needed.

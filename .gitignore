@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.remote-sync.json
 
 # C extensions
 *.so
