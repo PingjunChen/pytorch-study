@@ -24,14 +24,12 @@ def train_imagenet(model, args):
     os.makedirs(args.model_dir)
 
     best_prec = 0.0
-
     for epoch in range(1, args.epochs+1):
-        adjust_learning_rate(optimizer, epoch)
-
+        adjust_learning_rate(optimizer, epoch, args)
        # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
        # evaluate on validation set
-        cur_prec = validate(val_loader, model, criterion, args)
+        cur_prec, _ = validate(val_loader, model, criterion, args)
 
         # remember best prec@1 and save checkpoint
         is_best = cur_prec > best_prec
@@ -40,8 +38,6 @@ def train_imagenet(model, args):
             cur_model_name = args.model_name + "-" + str(epoch).zfill(2) + "-" + str(cur_prec) + ".pth"
             torch.save(model.state_dict(), os.path.join(args.model_dir, cur_model_name))
             print('Save weights at {}/{}'.format(args.model_dir, cur_model_name))
-
-
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter()
@@ -87,7 +83,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses, top1=top1, top5=top5))
 
-
 def validate(val_loader, model, criterion, args):
     batch_time = AverageMeter()
     losses = AverageMeter()
@@ -95,36 +90,35 @@ def validate(val_loader, model, criterion, args):
     top5 = AverageMeter()
 
     model.eval()
-    with torch.no_grad():
+
+    end = time.time()
+    for i, (inputs, targets) in enumerate(val_loader):
+        if args.cuda:
+            inputs, targets = inputs.cuda(args.device_id), targets.cuda(args.device_id)
+        inputs, targets = Variable(inputs), Variable(targets)
+        # compute output
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+
+        # measure accuracy and record loss
+        prec1, prec5 = accuracy(outputs, targets, topk=(1, 5))
+        losses.update(loss.item(), inputs.size(0))
+        top1.update(prec1[0], inputs.size(0))
+        top5.update(prec5[0], inputs.size(0))
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
         end = time.time()
-        for i, (inputs, targets) in enumerate(val_loader):
-            if args.cuda:
-                inputs, targets = inputs.cuda(args.device_id), targets.cuda(args.device_id)
-            inputs, targets = Variable(inputs), Variable(targets)
-            # compute output
-            outputs = model(inputs)
-            loss = criterion(outputs, targets)
 
-            # measure accuracy and record loss
-            prec1, prec5 = accuracy(outputs, targets, topk=(1, 5))
-            losses.update(loss.item(), inputs.size(0))
-            top1.update(prec1[0], inputs.size(0))
-            top5.update(prec5[0], inputs.size(0))
+        if i % args.log_interval == 0:
+            print('Test: [{0}/{1}]\t'
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+                   i, len(val_loader), batch_time=batch_time, loss=losses,
+                   top1=top1, top5=top5))
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+    print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'.format(top1=top1, top5=top5))
 
-            if i % args.log_interval == 0:
-                print('Test: [{0}/{1}]\t'
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                       i, len(val_loader), batch_time=batch_time, loss=losses,
-                       top1=top1, top5=top5))
-
-        print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'
-              .format(top1=top1, top5=top5))
-
-    return top1.avg
+    return top1.avg, top5.avg

@@ -6,12 +6,11 @@ import torch.utils.data
 from torchvision import datasets, transforms
 
 imagenet_root = ""
-imagenet_traindir = os.path.join(args.data, 'train')
-imagenet_valdir = os.path.join(args.data, 'val')
-imagenet_testdir = os.path.join(args.data, 'test')
 imagenet_num_class = 1000
-imagenet_mean = (0.485, 0.456, 0.406)
-imagenet_std = (0.229, 0.224, 0.225)
+imagenet_traindir = os.path.join(imagenet_root, 'train')
+imagenet_valdir = os.path.join(imagenet_root, 'val')
+imagenet_testdir = os.path.join(imagenet_root, 'test')
+imagenet_mean, imagenet_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
 
 
 def train_imagenet_loader(args):
@@ -27,8 +26,7 @@ def train_imagenet_loader(args):
         )
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size,
-        batch_size=args.batch_size, shuffle=True, **kwargs)
+        train_dataset, batch_size=args.batch_size, shuffle=True, **kwargs)
 
     return train_loader
 
@@ -49,6 +47,7 @@ def val_imagenet_loader(args):
         val_dataset, batch_size=args.batch_size, shuffle=False, **kwargs)
 
     return val_loader
+
 
 def test_imagenet_loader(args):
     kwargs = {"num_workers": 4, "pin_memory": True} if args.cuda else {}
