@@ -5,7 +5,7 @@ import os, sys, pdb
 import torch.utils.data
 from torchvision import datasets, transforms
 
-imagenet_root = ""
+imagenet_root = "../data/ImageNet/"
 imagenet_num_class = 1000
 imagenet_traindir = os.path.join(imagenet_root, 'train')
 imagenet_valdir = os.path.join(imagenet_root, 'val')
