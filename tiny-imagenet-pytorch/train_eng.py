@@ -15,7 +15,6 @@ from loader import val_imagenet_loader
 from utils import adjust_learning_rate
 from utils import accuracy, AverageMeter
 
-
 def train_imagenet(model, args):
     optimizer = optim.SGD(model.parameters(), weight_decay=args.weight_decay,
                           lr=args.lr, momentum=args.momentum)
@@ -42,7 +41,6 @@ def train_imagenet(model, args):
             cur_model_name = args.model_name + "-" + str(epoch).zfill(2) + "-{:.3f}.pth".format(best_prec)
             torch.save(model.state_dict(), os.path.join(args.model_dir, cur_model_name))
             print('Save weights at {}/{}'.format(args.model_dir, cur_model_name))
-
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter()

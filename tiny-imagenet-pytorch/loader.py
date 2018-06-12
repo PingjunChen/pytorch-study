@@ -5,15 +5,17 @@ import os, sys, pdb
 import torch.utils.data
 from torchvision import datasets, transforms
 
-imagenet_root = "/data/.data2/pingjun/ImageNet/ILSVRC2012"
-imagenet_num_class = 1000
-# imagenet_root = "../data/tiny-imagenet-20"
-# imagenet_num_class = 200
+# imagenet_root = "../data/ImageNet"
+# imagenet_num_class = 1000
+imagenet_root = "../data/tiny-imagenet-200"
+imagenet_num_class = 200
 
-imagenet_traindir = os.path.join(imagenet_root, 'ILSVRC2012_img_train')
-imagenet_valdir = os.path.join(imagenet_root, 'ILSVRC2012_img_val')
+imagenet_traindir = os.path.join(imagenet_root, 'train')
+imagenet_valdir = os.path.join(imagenet_root, 'val')
 imagenet_testdir = os.path.join(imagenet_root, 'test')
 imagenet_mean, imagenet_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+
+
 
 # from torchvision.datasets import ImageFolder
 # from torchvision.transforms import ToTensor
@@ -26,7 +28,6 @@ def train_imagenet_loader(args):
     train_dataset = datasets.ImageFolder(
         imagenet_traindir,
         transform = transforms.Compose([
-            transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(imagenet_mean, imagenet_std)])
@@ -44,8 +45,6 @@ def val_imagenet_loader(args):
     val_dataset = datasets.ImageFolder(
         imagenet_valdir,
         transform = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(imagenet_mean, imagenet_std)])
         )
