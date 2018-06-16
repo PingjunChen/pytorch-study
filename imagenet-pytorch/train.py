@@ -20,18 +20,18 @@ def set_args():
     parser = argparse.ArgumentParser(description='PyTorch ImageNet2012 classification')
     # mini_batch and epoch information
     parser.add_argument('--epochs',          type=int,   default=90)
-    parser.add_argument('--batch-size',      type=int,   default=32)
+    parser.add_argument('--batch-size',      type=int,   default=64)
     # Optimization parameters
     parser.add_argument('--lr',              type=float, default=0.1)
     parser.add_argument('--momentum',        type=float, default=0.9)
     parser.add_argument('--weight-decay',    type=float, default=5.0e-4)
     #
     parser.add_argument('--seed',            type=int,   default=1)
-    parser.add_argument('--device-id',       type=int,   default=0)
+    parser.add_argument('--device-id',       type=int,   default=4)
     parser.add_argument('--log-interval',    type=int,   default=20)
     # model directory and name
-    parser.add_argument('--model-dir',       type=str,   default="../models/ImageNet/ResNet34")
-    parser.add_argument('--model-name',      type=str,   default="resnet34")
+    parser.add_argument('--model-dir',       type=str,   default="../models/ImageNet/ResNet101")
+    parser.add_argument('--model-name',      type=str,   default="resnet101")
 
     args = parser.parse_args()
     return args
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # Config model and gpu
     torch.manual_seed(args.seed)
     # model = models.vgg19(pretrained=False)
-    model = models.resnet34(pretrained=False)
+    model = models.resnet101(pretrained=False)
 
     args.cuda = torch.cuda.is_available()
     if args.cuda:

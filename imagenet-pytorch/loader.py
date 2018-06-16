@@ -21,7 +21,7 @@ imagenet_mean, imagenet_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
 
 
 def train_imagenet_loader(args):
-    kwargs = {"num_workers": 2, "pin_memory": True} if args.cuda else {}
+    kwargs = {"num_workers": 8, "pin_memory": True} if args.cuda else {}
 
     train_dataset = datasets.ImageFolder(
         imagenet_traindir,
