@@ -79,6 +79,6 @@ if __name__ == '__main__':
     # Model parameters (should be same as paramters in train.py)
     parser.add_argument('--embed_size',   type=int , default=256, help='dimension of word embedding vectors')
     parser.add_argument('--hidden_size',  type=int , default=512, help='dimension of lstm hidden states')
-    parser.add_argument('--num_layers',   type=int , default=1, help='number of layers in lstm')
+    parser.add_argument('--num_layers',   type=int , default=1,   help='number of layers in lstm')
     args = parser.parse_args()
     main(args)
