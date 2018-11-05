@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 import torch
 import torch.nn as nn
 import torchvision
 from torchvision import transforms
+from torch.autograd import Variable
 from logger import Logger
 
 
@@ -40,6 +41,10 @@ model.cuda()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
 
+data_iter = iter(data_loader)
+iter_per_epoch = len(data_loader)
+total_step = 50000
+
 # Start training
 for step in range(total_step):
     # Reset the data_iter
@@ -49,13 +54,14 @@ for step in range(total_step):
     # Fetch images and labels
     images, labels = next(data_iter)
     images, labels = images.view(images.size(0), -1).cuda(), labels.cuda()
-
+    images = Variable(images)
+    labels = Variable(labels)
     # Forward pass
+    optimizer.zero_grad()
     outputs = model(images)
     loss = criterion(outputs, labels)
 
     # Backward and optimize
-    optimizer.zero_grad()
     loss.backward()
     optimizer.step()
 
