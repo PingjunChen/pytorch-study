@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 import numpy as np
 import argparse, pickle
@@ -16,7 +17,7 @@ from build_vocab import Vocabulary
 from model import EncoderCNN, DecoderRNN
 
 # Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 def train_caption_model(args):
@@ -42,8 +43,14 @@ def train_caption_model(args):
                              shuffle=True, num_workers=args.num_workers)
 
     # Build the models
-    encoder = EncoderCNN(args.embed_size).to(device)
-    decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers).to(device)
+    encoder = EncoderCNN(args.embed_size)
+    decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers)
+    if torch.cuda.device_count() > 1:
+        print("{} GPUs are in use.".format(torch.cuda.device_count()))
+        encoder = nn.DataParallel(encoder)
+        decoder = nn.DataParallel(decoder)
+    encoder.to(device)
+    decoder.to(device)
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -97,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_layers',    type=int , default=1,   help='number of layers in lstm')
 
     parser.add_argument('--num_epochs',    type=int,  default=5)
-    parser.add_argument('--batch_size',    type=int,  default=128)
+    parser.add_argument('--batch_size',    type=int,  default=384)
     parser.add_argument('--num_workers',   type=int,  default=4)
     parser.add_argument('--learning_rate', type=float, default=0.001)
     args = parser.parse_args()
