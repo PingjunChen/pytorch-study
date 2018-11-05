@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3, 4"
 
 import torch
 import torch.nn as nn
@@ -11,11 +11,13 @@ from torch.autograd import Variable
 from logger import Logger
 
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 # MNIST dataset
 dataset = torchvision.datasets.MNIST(root='./data', train=True,
                                      transform=transforms.ToTensor(), download=True)
 # Data loader
-data_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=100, shuffle=True)
+data_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=300, shuffle=True)
 
 
 # Fully connected neural network with one hidden layer
@@ -30,12 +32,16 @@ class NeuralNet(nn.Module):
         out = self.fc1(x)
         out = self.relu(out)
         out = self.fc2(out)
+        # print("\t In Model: input size", x.size(), "output size", out.size())
         return out
 
 
 logger = Logger('./logs')
 model = NeuralNet()
-model.cuda()
+if torch.cuda.device_count() > 1:
+    print("{} GPUs are in use.".format(torch.cuda.device_count()))
+    model = nn.DataParallel(model)
+model.to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -53,12 +59,13 @@ for step in range(total_step):
 
     # Fetch images and labels
     images, labels = next(data_iter)
-    images, labels = images.view(images.size(0), -1).cuda(), labels.cuda()
-    images = Variable(images)
-    labels = Variable(labels)
+    images = Variable(images.view(images.size(0), -1).to(device))
+    labels = Variable(labels.to(device))
+
     # Forward pass
     optimizer.zero_grad()
     outputs = model(images)
+    # print("Outside: input size", images.size(), "output_size", outputs.size())
     loss = criterion(outputs, labels)
 
     # Backward and optimize
