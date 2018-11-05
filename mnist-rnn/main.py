@@ -8,7 +8,10 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
+from torch.optim import lr_scheduler
 
+torch.manual_seed(42)                     # CPU seed
+torch.cuda.manual_seed_all(42)            # GPU seed
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -19,7 +22,7 @@ hidden_size = 128
 num_layers = 2
 num_classes = 10
 batch_size = 100
-num_epochs = 2
+num_epochs = 5
 learning_rate = 0.01
 
 # MNIST dataset
@@ -49,8 +52,6 @@ class RNN(nn.Module):
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # Forward propagate LSTM
         out, _ = self.lstm(x, (h0, c0))  # out: tensor of shape (batch_size, seq_length, hidden_size)
-
-        import pdb; pdb.set_trace()
         # Decode the hidden state of the last time step
         out = self.fc(out[:, -1, :])
         return out
@@ -60,15 +61,15 @@ model = RNN(input_size, hidden_size, num_layers, num_classes).to(device)
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
+scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)
 
 # Train the model
 total_step = len(train_loader)
 for epoch in range(num_epochs):
+    scheduler.step()
     for i, (images, labels) in enumerate(train_loader):
         images = images.reshape(-1, sequence_length, input_size).to(device)
         labels = labels.to(device)
-        import pdb; pdb.set_trace()
         # Forward pass
         outputs = model(images)
         loss = criterion(outputs, labels)
@@ -89,11 +90,10 @@ with torch.no_grad():
         images = images.reshape(-1, sequence_length, input_size).to(device)
         labels = labels.to(device)
         outputs = model(images)
-        import pdb; pdb.set_trace()
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
-    print('Test Accuracy of the model on the 10000 test images: {} %'.format(100 * correct / total))
+    print('Test Accuracy of the model on the 10000 test images: {}%'.format(100 * correct / total))
 
 # # Save the model checkpoint
 # torch.save(model.state_dict(), 'model.ckpt')
