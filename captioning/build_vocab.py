@@ -30,6 +30,7 @@ class Vocabulary(object):
     def __len__(self):
         return len(self.word2idx)
 
+
 def build_vocab(json, threshold):
     """Build a simple vocabulary wrapper."""
     coco = COCO(json)

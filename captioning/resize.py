@@ -43,4 +43,5 @@ if __name__ == '__main__':
     parser.add_argument('--image_size', type=int, default=256,
                         help='size for image after processing')
     args = parser.parse_args()
+    
     main(args)

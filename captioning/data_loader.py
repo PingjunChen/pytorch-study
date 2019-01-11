@@ -12,6 +12,7 @@ import torch.utils.data as data
 from build_vocab import Vocabulary
 from pycocotools.coco import COCO
 
+
 class CocoDataset(data.Dataset):
     def __init__(self, root, json, vocab, transform=None):
         self.root = root

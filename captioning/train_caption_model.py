@@ -67,8 +67,10 @@ def train_caption_model(args):
 
             # Forward, backward and optimize
             features = encoder(images)
+            import pdb; pdb.set_trace()
             outputs = decoder(features, captions, lengths)
 
+            import pdb; pdb.set_trace()
             loss = criterion(outputs, targets)
             decoder.zero_grad()
             encoder.zero_grad()
